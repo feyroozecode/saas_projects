@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Nexus - AI Model Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        dark: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+        }
+        
+        .model-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        
+        .model-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+            border-color: rgba(226, 232, 240, 0.9);
+        }
+        
+        .tag-pill {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #0ea5e9;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+        }
+        
+        .active-tab {
+            background-color: #f8fafc;
+            color: #0ea5e9;
+            font-weight: 600;
+            border-left: 3px solid #0ea5e9;
+        }
+        
+        .provider-badge {
+            height: 24px;
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            opacity: 0.1;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div id="app">
+        <!-- Floating background shapes -->
+        <div class="floating-shape top-20 left-10 w-64 h-64 bg-primary-500 rounded-full mix-blend-multiply filter blur-xl"></div>
+        <div class="floating-shape top-1/2 right-0 w-96 h-96 bg-secondary-500 rounded-full mix-blend-multiply filter blur-xl"></div>
+        
+        <!-- Header -->
+        <header class="hero-gradient text-white relative overflow-hidden">
+            <div class="container mx-auto px-4 py-6 relative z-10">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+                            <i class="fas fa-brain text-2xl"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold">Neural Nexus</h1>
+                    </div>
+                    <nav class="hidden lg:flex space-x-8">
+                        <a href="#" class="nav-link text-white/90 hover:text-white transition-all">Home</a>
+                        <a href="#" class="nav-link text-white/90 hover:text-white transition-all">Models</a>
+                        <a href="#" class="nav-link text-white/90 hover:text-white transition-all">Benchmarks</a>
+                        <a href="#" class="nav-link text-white/90 hover:text-white transition-all">API</a>
+                        <a href="#" class="nav-link text-white/90 hover:text-white transition-all">Research</a>
+                    </nav>
+                    <div class="hidden lg:flex items-center space-x-4">
+                        <button class="px-4 py-2 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition-all">
+                            Sign In
+                        </button>
+                        <button class="px-4 py-2 text-sm font-medium bg-white text-primary-600 rounded-lg hover:bg-white/90 transition-all">
+                            Sign Up
+                        </button>
+                    </div>
+                    <button class="lg:hidden text-white">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <div class="mt-16 mb-16 max-w-3xl">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Discover & Integrate Cutting-Edge AI Models</h2>
+                    <p class="text-xl text-white/90 leading-relaxed">The most comprehensive directory of state-of-the-art AI models for developers, researchers, and businesses.</p>
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                        <button class="px-6 py-3 bg-white text-primary-600 font-medium rounded-lg hover:bg-white/90 transition-all flex items-center justify-center">
+                            <i class="fas fa-rocket mr-2"></i> Explore Models
+                        </button>
+                        <button class="px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-medium rounded-lg hover:bg-white/20 transition-all flex items-center justify-center">
+                            <i class="fas fa-book mr-2"></i> Read Documentation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-12 relative z-10">
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div class="text-3xl font-bold text-primary-600 mb-2">1,250+</div>
+                    <div class="text-slate-500">AI Models</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div class="text-3xl font-bold text-primary-600 mb-2">85+</div>
+                    <div class="text-slate-500">Providers</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div class="text-3xl font-bold text-primary-600 mb-2">12</div>
+                    <div class="text-slate-500">Categories</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <div class="text-3xl font-bold text-primary-600 mb-2">24/7</div>
+                    <div class="text-slate-500">API Access</div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-slate-100">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="relative flex-grow">
+                        <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search models by name, provider, or capabilities..." 
+                            class="search-input w-full pl-12 pr-4 py-3 border border-slate-200 rounded-lg focus:border-primary-500 transition-all"
+                            v-model="searchQuery"
+                            @input="filterModels"
+                        >
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <select class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none bg-white">
+                            <option>All Categories</option>
+                            <option>Text</option>
+                            <option>Image</option>
+                            <option>Audio</option>
+                            <option>Video</option>
+                            <option>Multimodal</option>
+                        </select>
+                        <select class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none bg-white">
+                            <option>All Providers</option>
+                            <option>OpenAI</option>
+                            <option>Google</option>
+                            <option>Meta</option>
+                            <option>Anthropic</option>
+                            <option>Stability AI</option>
+                        </select>
+                        <select class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none bg-white">
+                            <option>Sort By: Popularity</option>
+                            <option>Release Date</option>
+                            <option>Parameters</option>
+                            <option>Benchmark Score</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Tabs (Vertical) -->
+                <div class="lg:w-56 flex-shrink-0">
+                    <div class="bg-white rounded-xl shadow-sm p-2 border border-slate-100 sticky top-6">
+                        <button 
+                            v-for="(tab, index) in tabs" 
+                            :key="index"
+                            @click="activeTab = tab.id"
+                            :class="['w-full text-left px-4 py-3 rounded-lg text-sm', activeTab === tab.id ? 'active-tab' : 'text-slate-600 hover:bg-slate-50']"
+                        >
+                            <i :class="tab.icon + ' mr-3'"></i>
+                            {{ tab.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Model Cards -->
+                <div class="flex-1">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-slate-800">
+                            {{ activeTab === 'all' ? 'All AI Models' : tabs.find(t => t.id === activeTab).name + ' Models' }}
+                            <span class="text-slate-400 ml-2">({{ filteredModels.length }})</span>
+                        </h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div 
+                            v-for="model in filteredModels" 
+                            :key="model.id"
+                            class="model-card bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100 hover:border-slate-200"
+                        >
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <div class="flex items-center mb-1">
+                                            <div 
+                                                class="provider-badge mr-3" 
+                                                :class="{
+                                                    'bg-emerald-100 text-emerald-800': model.provider === 'OpenAI',
+                                                    'bg-blue-100 text-blue-800': model.provider === 'Google',
+                                                    'bg-purple-100 text-purple-800': model.provider === 'Meta',
+                                                    'bg-amber-100 text-amber-800': model.provider === 'Anthropic',
+                                                    'bg-indigo-100 text-indigo-800': model.provider === 'Stability AI'
+                                                }"
+                                            >
+                                                {{ model.provider.charAt(0) }}
+                                            </div>
+                                            <h3 class="text-lg font-bold text-slate-800">{{ model.name }}</h3>
+                                        </div>
+                                        <div class="flex items-center text-xs text-slate-500 ml-9">
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            <span>{{ model.releaseDate }}</span>
+                                            <span class="mx-2">•</span>
+                                            <i class="fas fa-microchip mr-1"></i>
+                                            <span>{{ model.parameters }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="tag-pill" :class="{
+                                        'bg-blue-100 text-blue-800': model.category === 'Text',
+                                        'bg-green-100 text-green-800': model.category === 'Image',
+                                        'bg-purple-100 text-purple-800': model.category === 'Multimodal',
+                                        'bg-amber-100 text-amber-800': model.category === 'Audio'
+                                    }">
+                                        {{ model.category }}
+                                    </span>
+                                </div>
+                                <p class="text-slate-600 text-sm mb-4">{{ model.description }}</p>
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <span v-for="(tag, index) in model.tags" :key="index" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
+                                        {{ tag }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-t border-slate-100">
+                                <a :href="model.docsUrl" class="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center">
+                                    <i class="fas fa-book-open mr-2"></i> Documentation
+                                </a>
+                                <div class="flex space-x-2">
+                                    <button class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-medium transition-all">
+                                        <i class="fas fa-star mr-1"></i> Save
+                                    </button>
+                                    <button class="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-medium transition-all">
+                                        Try API
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="filteredModels.length === 0" class="bg-white rounded-xl shadow-sm p-12 text-center border border-slate-100">
+                        <i class="fas fa-search text-4xl text-slate-300 mb-4"></i>
+                        <h4 class="text-lg font-medium text-slate-700 mb-2">No models found</h4>
+                        <p class="text-slate-500 max-w-md mx-auto">Try adjusting your search or filter criteria to find what you're looking for.</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-10">
+                        <div class="text-sm text-slate-500">
+                            Showing <span class="font-medium">1-{{ filteredModels.length }}</span> of <span class="font-medium">{{ filteredModels.length }}</span> models
+                        </div>
+                        <nav class="inline-flex rounded-md shadow-sm">
+                            <a href="#" class="px-3 py-2 rounded-l-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            <a href="#" class="px-4 py-2 border-t border-b border-slate-200 bg-white text-primary-600 font-medium">1</a>
+                            <a href="#" class="px-4 py-2 border-t border-b border-slate-200 bg-white text-slate-500 hover:bg-slate-50">2</a>
+                            <a href="#" class="px-4 py-2 border-t border-b border-slate-200 bg-white text-slate-500 hover:bg-slate-50">3</a>
+                            <a href="#" class="px-4 py-2 border-t border-b border-slate-200 bg-white text-slate-500 hover:bg-slate-50">4</a>
+                            <a href="#" class="px-4 py-2 border-t border-b border-slate-200 bg-white text-slate-500 hover:bg-slate-50">5</a>
+                            <a href="#" class="px-3 py-2 rounded-r-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Features Section -->
+        <section class="bg-slate-50 py-16 border-t border-slate-200">
+            <div class="container mx-auto px-4">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">Why Choose Neural Nexus?</h2>
+                    <p class="text-slate-600">We provide the most comprehensive platform for discovering, comparing, and integrating AI models into your applications.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 mb-4">
+                            <i class="fas fa-bolt text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Instant API Access</h3>
+                        <p class="text-slate-600">Get immediate access to all models through our unified API endpoint with just a few lines of code.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 mb-4">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Comprehensive Benchmarks</h3>
+                        <p class="text-slate-600">Compare model performance across standardized benchmarks to find the best fit for your use case.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 mb-4">
+                            <i class="fas fa-cogs text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Easy Integration</h3>
+                        <p class="text-slate-600">Detailed documentation and SDKs for all major programming languages to get you started quickly.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="bg-primary-600 text-white py-16">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold mb-4">Ready to Build with AI?</h2>
+                <p class="text-primary-100 max-w-2xl mx-auto mb-8">Join thousands of developers and businesses leveraging the power of cutting-edge AI models.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                    <button class="px-6 py-3 bg-white text-primary-600 font-medium rounded-lg hover:bg-white/90 transition-all">
+                        Get Started for Free
+                    </button>
+                    <button class="px-6 py-3 bg-primary-700 text-white font-medium rounded-lg hover:bg-primary-800 transition-all border border-primary-500">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 text-slate-400 py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                    <div class="md:col-span-2">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-brain mr-2 text-primary-400"></i> Neural Nexus
+                        </h3>
+                        <p class="mb-6">The most comprehensive directory of AI models for developers and researchers.</p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-slate-400 hover:text-white text-xl transition-all"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-slate-400 hover:text-white text-xl transition-all"><i class="fab fa-github"></i></a>
+                            <a href="#" class="text-slate-400 hover:text-white text-xl transition-all"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-slate-400 hover:text-white text-xl transition-all"><i class="fab fa-discord"></i></a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Resources</h4>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="hover:text-white transition-all">Documentation</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">API Reference</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Tutorials</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Blog</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Research Papers</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Company</h4>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="hover:text-white transition-all">About Us</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Careers</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Contact</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition-all">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Subscribe</h4>
+                        <p class="mb-4">Get the latest AI updates straight to your inbox.</p>
+                        <div class="flex">
+                            <input 
+                                type="email" 
+                                placeholder="Your email" 
+                                class="flex-grow px-4 py-2 bg-slate-800 border border-slate-700 rounded-l-lg focus:border-primary-500 focus:outline-none text-sm"
+                            >
+                            <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-r-lg text-sm font-medium transition-all">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-slate-800 mt-12 pt-8 text-center text-sm">
+                    <p>© 2023 Neural Nexus. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                const searchQuery = ref('');
+                const activeTab = ref('all');
+                
+                const tabs = [
+                    { id: 'all', name: 'All Models', icon: 'fas fa-boxes' },
+                    { id: 'text', name: 'Text', icon: 'fas fa-font' },
+                    { id: 'image', name: 'Image', icon: 'fas fa-image' },
+                    { id: 'audio', name: 'Audio', icon: 'fas fa-music' },
+                    { id: 'multimodal', name: 'Multimodal', icon: 'fas fa-eye' }
+                ];
+
+                const models = [
+                    {
+                        id: 1,
+                        name: 'GPT-4',
+                        provider: 'OpenAI',
+                        category: 'Text',
+                        description: 'Most capable and aligned model for general natural language tasks with improved reasoning and creativity.',
+                        tags: ['LLM', 'Chat', 'Completion', 'Embeddings'],
+                        parameters: '1.8T',
+                        releaseDate: 'Mar 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 2,
+                        name: 'PaLM 2',
+                        provider: 'Google',
+                        category: 'Text',
+                        description: 'Next generation large language model with improved multilingual, reasoning and coding capabilities.',
+                        tags: ['LLM', 'Multilingual', 'Code'],
+                        parameters: '340B',
+                        releaseDate: 'May 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 3,
+                        name: 'Stable Diffusion XL',
+                        provider: 'Stability AI',
+                        category: 'Image',
+                        description: 'Advanced text-to-image model generating high-resolution, photorealistic images from text prompts.',
+                        tags: ['Text-to-Image', 'Diffusion'],
+                        parameters: '2.3B',
+                        releaseDate: 'Jun 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 4,
+                        name: 'Claude 2',
+                        provider: 'Anthropic',
+                        category: 'Text',
+                        description: 'Constitutional AI assistant focused on helpfulness, honesty, and harmlessness.',
+                        tags: ['LLM', 'Chat', 'Safety'],
+                        parameters: '137B',
+                        releaseDate: 'Jul 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 5,
+                        name: 'Whisper',
+                        provider: 'OpenAI',
+                        category: 'Audio',
+                        description: 'Robust speech recognition model that transcribes, translates, and identifies multiple languages.',
+                        tags: ['Speech-to-Text', 'Translation'],
+                        parameters: '1.5B',
+                        releaseDate: 'Sep 2022',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 6,
+                        name: 'DALL·E 3',
+                        provider: 'OpenAI',
+                        category: 'Image',
+                        description: 'Advanced AI system that can create realistic images and art from natural language descriptions.',
+                        tags: ['Text-to-Image', 'Art'],
+                        parameters: '12B',
+                        releaseDate: 'Oct 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 7,
+                        name: 'LLaMA 2',
+                        provider: 'Meta',
+                        category: 'Text',
+                        description: 'Open source foundational large language model for research and commercial use.',
+                        tags: ['LLM', 'Open Source'],
+                        parameters: '70B',
+                        releaseDate: 'Jul 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 8,
+                        name: 'GPT-4 Vision',
+                        provider: 'OpenAI',
+                        category: 'Multimodal',
+                        description: 'Multimodal model that understands images and text, enabling visual question answering.',
+                        tags: ['Vision', 'Text', 'Multimodal'],
+                        parameters: '1.8T',
+                        releaseDate: 'Sep 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 9,
+                        name: 'MusicGen',
+                        provider: 'Meta',
+                        category: 'Audio',
+                        description: 'Simple and controllable model for music generation conditioned on text descriptions.',
+                        tags: ['Text-to-Music', 'Generation'],
+                        parameters: '3.3B',
+                        releaseDate: 'Jun 2023',
+                        docsUrl: '#'
+                    }
+                ];
+
+                const filteredModels = computed(() => {
+                    let result = models;
+                    
+                    // Filter by search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(model => 
+                            model.name.toLowerCase().includes(query) || 
+                            model.provider.toLowerCase().includes(query) ||
+                            model.description.toLowerCase().includes(query) ||
+                            model.tags.some(tag => tag.toLowerCase().includes(query))
+                        );
+                    }
+                    
+                    // Filter by active tab
+                    if (activeTab.value !== 'all') {
+                        result = result.filter(model => 
+                            model.category.toLowerCase() === activeTab.value
+                        );
+                    }
+                    
+                    return result;
+                });
+
+                const filterModels = () => {
+                    // The computed property will automatically update
+                };
+
+                return {
+                    searchQuery,
+                    activeTab,
+                    tabs,
+                    filteredModels,
+                    filterModels
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
