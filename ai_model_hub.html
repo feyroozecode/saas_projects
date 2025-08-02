@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Hub - Top AI Models</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .model-tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(167, 119, 227, 0.3);
+        }
+        .active-tab {
+            border-bottom: 3px solid #a777e3;
+            color: #a777e3;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-robot text-3xl"></i>
+                        <h1 class="text-2xl font-bold">AI Model Hub</h1>
+                    </div>
+                    <nav class="hidden md:flex space-x-8">
+                        <a href="#" class="text-white hover:text-gray-200 transition-all">Home</a>
+                        <a href="#" class="text-white hover:text-gray-200 transition-all">Models</a>
+                        <a href="#" class="text-white hover:text-gray-200 transition-all">Benchmarks</a>
+                        <a href="#" class="text-white hover:text-gray-200 transition-all">API</a>
+                        <a href="#" class="text-white hover:text-gray-200 transition-all">Docs</a>
+                    </nav>
+                    <button class="md:hidden text-white">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <div class="mt-12 mb-8">
+                    <h2 class="text-4xl font-bold mb-4">Discover Top AI Models</h2>
+                    <p class="text-xl max-w-2xl">Explore, compare and integrate the most advanced AI models across various domains</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8 -mt-10">
+            <!-- Search and Filter -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="relative flex-grow">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search models by name, category or provider..." 
+                            class="search-input w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:border-purple-500 transition-all"
+                            v-model="searchQuery"
+                            @input="filterModels"
+                        >
+                    </div>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:outline-none">
+                            <option>All Categories</option>
+                            <option>Text</option>
+                            <option>Image</option>
+                            <option>Audio</option>
+                            <option>Video</option>
+                            <option>Multimodal</option>
+                        </select>
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:outline-none">
+                            <option>All Providers</option>
+                            <option>OpenAI</option>
+                            <option>Google</option>
+                            <option>Meta</option>
+                            <option>Anthropic</option>
+                            <option>Stability AI</option>
+                        </select>
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:outline-none">
+                            <option>Sort By</option>
+                            <option>Popularity</option>
+                            <option>Release Date</option>
+                            <option>Parameters</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-8 overflow-x-auto">
+                <button 
+                    v-for="(tab, index) in tabs" 
+                    :key="index"
+                    @click="activeTab = tab.id"
+                    :class="['px-4 py-2 text-sm font-medium', activeTab === tab.id ? 'active-tab' : 'text-gray-500 hover:text-gray-700']"
+                >
+                    {{ tab.name }}
+                </button>
+            </div>
+
+            <!-- Model Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                    v-for="model in filteredModels" 
+                    :key="model.id"
+                    class="bg-white rounded-xl shadow-md overflow-hidden card-hover transition-all"
+                >
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">{{ model.name }}</h3>
+                                <p class="text-sm text-gray-500">{{ model.provider }}</p>
+                            </div>
+                            <span class="model-tag" :class="{
+                                'bg-blue-100 text-blue-800': model.category === 'Text',
+                                'bg-green-100 text-green-800': model.category === 'Image',
+                                'bg-purple-100 text-purple-800': model.category === 'Multimodal',
+                                'bg-yellow-100 text-yellow-800': model.category === 'Audio'
+                            }">
+                                {{ model.category }}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-4">{{ model.description }}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span v-for="(tag, index) in model.tags" :key="index" class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                {{ tag }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <div class="flex items-center">
+                                <i class="fas fa-microchip mr-1"></i>
+                                <span>{{ model.parameters }}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-alt mr-1"></i>
+                                <span>{{ model.releaseDate }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-3 flex justify-between items-center">
+                        <a :href="model.docsUrl" class="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center">
+                            <i class="fas fa-book-open mr-2"></i> Docs
+                        </a>
+                        <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                            Try API
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-10">
+                <nav class="inline-flex rounded-md shadow">
+                    <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-purple-600 font-medium">1</a>
+                    <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</a>
+                    <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</a>
+                    <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">4</a>
+                    <a href="#" class="px-4 py-2 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">5</a>
+                    <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+        </main>
+
+        <!-- Newsletter -->
+        <section class="bg-gray-100 py-12">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Stay Updated with AI Advancements</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-6">Subscribe to our newsletter to receive the latest updates on new AI models, benchmarks, and research papers.</p>
+                <div class="flex flex-col sm:flex-row justify-center max-w-md mx-auto gap-2">
+                    <input 
+                        type="email" 
+                        placeholder="Your email address" 
+                        class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                    >
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all">
+                        Subscribe
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-lg font-bold mb-4 flex items-center">
+                            <i class="fas fa-robot mr-2"></i> AI Model Hub
+                        </h3>
+                        <p class="text-gray-400">The most comprehensive directory of AI models for developers and researchers.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Resources</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Documentation</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">API Reference</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Tutorials</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Company</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">About Us</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Careers</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Contact</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-all">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold mb-4">Connect</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-white text-xl transition-all"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl transition-all"><i class="fab fa-github"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl transition-all"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white text-xl transition-all"><i class="fab fa-discord"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                    <p>© 2023 AI Model Hub. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                const searchQuery = ref('');
+                const activeTab = ref('all');
+                
+                const tabs = [
+                    { id: 'all', name: 'All Models' },
+                    { id: 'text', name: 'Text' },
+                    { id: 'image', name: 'Image' },
+                    { id: 'audio', name: 'Audio' },
+                    { id: 'multimodal', name: 'Multimodal' }
+                ];
+
+                const models = [
+                    {
+                        id: 1,
+                        name: 'GPT-4',
+                        provider: 'OpenAI',
+                        category: 'Text',
+                        description: 'Most capable and aligned model for general natural language tasks with improved reasoning and creativity.',
+                        tags: ['LLM', 'Chat', 'Completion', 'Embeddings'],
+                        parameters: '1.8T',
+                        releaseDate: 'Mar 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 2,
+                        name: 'PaLM 2',
+                        provider: 'Google',
+                        category: 'Text',
+                        description: 'Next generation large language model with improved multilingual, reasoning and coding capabilities.',
+                        tags: ['LLM', 'Multilingual', 'Code'],
+                        parameters: '340B',
+                        releaseDate: 'May 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 3,
+                        name: 'Stable Diffusion XL',
+                        provider: 'Stability AI',
+                        category: 'Image',
+                        description: 'Advanced text-to-image model generating high-resolution, photorealistic images from text prompts.',
+                        tags: ['Text-to-Image', 'Diffusion'],
+                        parameters: '2.3B',
+                        releaseDate: 'Jun 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 4,
+                        name: 'Claude 2',
+                        provider: 'Anthropic',
+                        category: 'Text',
+                        description: 'Constitutional AI assistant focused on helpfulness, honesty, and harmlessness.',
+                        tags: ['LLM', 'Chat', 'Safety'],
+                        parameters: '137B',
+                        releaseDate: 'Jul 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 5,
+                        name: 'Whisper',
+                        provider: 'OpenAI',
+                        category: 'Audio',
+                        description: 'Robust speech recognition model that transcribes, translates, and identifies multiple languages.',
+                        tags: ['Speech-to-Text', 'Translation'],
+                        parameters: '1.5B',
+                        releaseDate: 'Sep 2022',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 6,
+                        name: 'DALL·E 3',
+                        provider: 'OpenAI',
+                        category: 'Image',
+                        description: 'Advanced AI system that can create realistic images and art from natural language descriptions.',
+                        tags: ['Text-to-Image', 'Art'],
+                        parameters: '12B',
+                        releaseDate: 'Oct 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 7,
+                        name: 'LLaMA 2',
+                        provider: 'Meta',
+                        category: 'Text',
+                        description: 'Open source foundational large language model for research and commercial use.',
+                        tags: ['LLM', 'Open Source'],
+                        parameters: '70B',
+                        releaseDate: 'Jul 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 8,
+                        name: 'GPT-4 Vision',
+                        provider: 'OpenAI',
+                        category: 'Multimodal',
+                        description: 'Multimodal model that understands images and text, enabling visual question answering.',
+                        tags: ['Vision', 'Text', 'Multimodal'],
+                        parameters: '1.8T',
+                        releaseDate: 'Sep 2023',
+                        docsUrl: '#'
+                    },
+                    {
+                        id: 9,
+                        name: 'MusicGen',
+                        provider: 'Meta',
+                        category: 'Audio',
+                        description: 'Simple and controllable model for music generation conditioned on text descriptions.',
+                        tags: ['Text-to-Music', 'Generation'],
+                        parameters: '3.3B',
+                        releaseDate: 'Jun 2023',
+                        docsUrl: '#'
+                    }
+                ];
+
+                const filteredModels = computed(() => {
+                    let result = models;
+                    
+                    // Filter by search query
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        result = result.filter(model => 
+                            model.name.toLowerCase().includes(query) || 
+                            model.provider.toLowerCase().includes(query) ||
+                            model.description.toLowerCase().includes(query) ||
+                            model.tags.some(tag => tag.toLowerCase().includes(query))
+                        );
+                    }
+                    
+                    // Filter by active tab
+                    if (activeTab.value !== 'all') {
+                        result = result.filter(model => 
+                            model.category.toLowerCase() === activeTab.value
+                        );
+                    }
+                    
+                    return result;
+                });
+
+                const filterModels = () => {
+                    // The computed property will automatically update
+                };
+
+                return {
+                    searchQuery,
+                    activeTab,
+                    tabs,
+                    filteredModels,
+                    filterModels
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
