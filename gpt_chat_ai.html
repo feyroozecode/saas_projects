@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Animation for typing indicator */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .typing-indicator span {
+            animation: pulse 1.5s infinite;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-white border-r border-gray-200">
+                <div class="flex items-center justify-center h-16 px-4 bg-indigo-600">
+                    <h1 class="text-white text-xl font-bold">GPT Assistant</h1>
+                </div>
+                <div class="flex flex-col flex-grow p-4 overflow-auto">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">History</h2>
+                        <button id="clearHistory" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div id="historyList" class="space-y-2 overflow-y-auto">
+                        <!-- History items will be added here -->
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" 
+                             alt="User" class="w-8 h-8 rounded-full">
+                        <span class="text-sm font-medium text-gray-700">User</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile sidebar toggle -->
+        <div class="md:hidden fixed bottom-4 right-4 z-10">
+            <button id="mobileSidebarToggle" 
+                    class="p-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition">
+                <i class="fas fa-history"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile sidebar (hidden by default) -->
+        <div id="mobileSidebar" 
+             class="fixed inset-0 z-20 bg-black bg-opacity-50 hidden">
+            <div class="absolute right-0 top-0 h-full w-3/4 bg-white shadow-lg transform transition-transform duration-300 translate-x-full">
+                <div class="flex items-center justify-between h-16 px-4 bg-indigo-600">
+                    <h2 class="text-white text-lg font-semibold">Chat History</h2>
+                    <button id="closeMobileSidebar" class="text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 overflow-y-auto h-[calc(100%-4rem)]">
+                    <div id="mobileHistoryList" class="space-y-2">
+                        <!-- Mobile history items will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
+                <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="text-lg font-semibold text-gray-800">New Chat</h1>
+                <div class="flex items-center space-x-2">
+                    <button class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat area -->
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 bg-gray-50">
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <!-- Welcome message -->
+                    <div class="flex justify-start">
+                        <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%] fade-in">
+                            <div class="flex items-start space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                     alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                                <div>
+                                    <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                    <p class="text-gray-700 mt-1">Hello! I'm your AI assistant. How can I help you today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat messages will be added here -->
+                </div>
+            </div>
+            
+            <!-- Input area -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <div class="max-w-3xl mx-auto">
+                    <form id="promptForm" class="relative">
+                        <div class="flex items-center">
+                            <input type="text" id="promptInput" 
+                                   class="flex-1 border border-gray-300 rounded-full py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                   placeholder="Type your message..." autocomplete="off">
+                            <button type="submit" 
+                                    class="absolute right-2 p-2 text-indigo-600 hover:text-indigo-800 rounded-full">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-xs text-gray-500 mt-2 text-center">
+                        AI Assistant may produce inaccurate information. Consider checking important information.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const promptForm = document.getElementById('promptForm');
+            const promptInput = document.getElementById('promptInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const historyList = document.getElementById('historyList');
+            const mobileHistoryList = document.getElementById('mobileHistoryList');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const closeMobileSidebar = document.getElementById('closeMobileSidebar');
+            
+            // Load history from localStorage
+            let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+            
+            // Render chat history
+            function renderHistory() {
+                historyList.innerHTML = '';
+                mobileHistoryList.innerHTML = '';
+                
+                if (chatHistory.length === 0) {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'text-gray-500 text-sm text-center py-4';
+                    emptyMsg.textContent = 'No chat history yet';
+                    historyList.appendChild(emptyMsg);
+                    mobileHistoryList.appendChild(emptyMsg.cloneNode(true));
+                    return;
+                }
+                
+                chatHistory.forEach((chat, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition';
+                    historyItem.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-comment text-indigo-500"></i>
+                            <span class="text-sm truncate">${chat.prompt.substring(0, 30)}${chat.prompt.length > 30 ? '...' : ''}</span>
+                        </div>
+                    `;
+                    
+                    historyItem.addEventListener('click', () => {
+                        loadChatFromHistory(index);
+                        if (mobileSidebar.classList.contains('hidden')) {
+                            mobileSidebar.classList.remove('hidden');
+                            setTimeout(() => {
+                                document.querySelector('#mobileSidebar > div').classList.remove('translate-x-full');
+                            }, 10);
+                        }
+                    });
+                    
+                    historyList.appendChild(historyItem);
+                    mobileHistoryList.appendChild(historyItem.cloneNode(true));
+                });
+            }
+            
+            // Load a chat from history
+            function loadChatFromHistory(index) {
+                const chat = chatHistory[index];
+                chatContainer.innerHTML = `
+                    <div class="max-w-3xl mx-auto space-y-4">
+                        <div class="flex justify-start">
+                            <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%] fade-in">
+                                <div class="flex items-start space-x-3">
+                                    <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                         alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                                    <div>
+                                        <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                        <p class="text-gray-700 mt-1">Hello! I'm your AI assistant. How can I help you today?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add the loaded chat messages
+                const chatDiv = chatContainer.querySelector('.space-y-4');
+                
+                // Add user prompt
+                const userMsg = document.createElement('div');
+                userMsg.className = 'flex justify-end fade-in';
+                userMsg.innerHTML = `
+                    <div class="bg-indigo-100 p-4 rounded-lg shadow-sm max-w-[80%]">
+                        <p class="text-gray-800">${chat.prompt}</p>
+                    </div>
+                `;
+                chatDiv.appendChild(userMsg);
+                
+                // Add AI response
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'flex justify-start fade-in';
+                aiMsg.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%]">
+                        <div class="flex items-start space-x-3">
+                            <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                 alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                            <div>
+                                <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                <p class="text-gray-700 mt-1">${chat.response}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatDiv.appendChild(aiMsg);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Clear chat history
+            clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all chat history?')) {
+                    chatHistory = [];
+                    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                    renderHistory();
+                }
+            });
+            
+            // Toggle sidebar on mobile
+            sidebarToggle.addEventListener('click', () => {
+                mobileSidebar.classList.remove('hidden');
+                setTimeout(() => {
+                    document.querySelector('#mobileSidebar > div').classList.remove('translate-x-full');
+                }, 10);
+            });
+            
+            // Toggle mobile sidebar
+            mobileSidebarToggle.addEventListener('click', () => {
+                mobileSidebar.classList.remove('hidden');
+                setTimeout(() => {
+                    document.querySelector('#mobileSidebar > div').classList.remove('translate-x-full');
+                }, 10);
+            });
+            
+            // Close mobile sidebar
+            closeMobileSidebar.addEventListener('click', () => {
+                document.querySelector('#mobileSidebar > div').classList.add('translate-x-full');
+                setTimeout(() => {
+                    mobileSidebar.classList.add('hidden');
+                }, 300);
+            });
+            
+            // Handle form submission
+            promptForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const prompt = promptInput.value.trim();
+                if (!prompt) return;
+                
+                // Add user message to chat
+                const userMsg = document.createElement('div');
+                userMsg.className = 'flex justify-end fade-in';
+                userMsg.innerHTML = `
+                    <div class="bg-indigo-100 p-4 rounded-lg shadow-sm max-w-[80%]">
+                        <p class="text-gray-800">${prompt}</p>
+                    </div>
+                `;
+                chatContainer.querySelector('.space-y-4').appendChild(userMsg);
+                
+                // Clear input
+                promptInput.value = '';
+                
+                // Add typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'flex justify-start fade-in';
+                typingIndicator.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%]">
+                        <div class="flex items-start space-x-3">
+                            <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                 alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                            <div>
+                                <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                <div class="typing-indicator flex space-x-1 mt-1">
+                                    <span class="h-2 w-2 bg-gray-400 rounded-full"></span>
+                                    <span class="h-2 w-2 bg-gray-400 rounded-full"></span>
+                                    <span class="h-2 w-2 bg-gray-400 rounded-full"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.querySelector('.space-y-4').appendChild(typingIndicator);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                try {
+                    // Simulate API call (in a real app, you would call your backend API here)
+                    const response = await simulateApiCall(prompt);
+                    
+                    // Remove typing indicator
+                    typingIndicator.remove();
+                    
+                    // Add AI response
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'flex justify-start fade-in';
+                    aiMsg.innerHTML = `
+                        <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%]">
+                            <div class="flex items-start space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                     alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                                <div>
+                                    <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                    <p class="text-gray-700 mt-1">${response}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.querySelector('.space-y-4').appendChild(aiMsg);
+                    
+                    // Scroll to bottom
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    // Save to history
+                    chatHistory.unshift({
+                        prompt: prompt,
+                        response: response,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Keep only the last 20 chats
+                    if (chatHistory.length > 20) {
+                        chatHistory = chatHistory.slice(0, 20);
+                    }
+                    
+                    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+                    renderHistory();
+                    
+                } catch (error) {
+                    // Remove typing indicator
+                    typingIndicator.remove();
+                    
+                    // Show error message
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'flex justify-start fade-in';
+                    errorMsg.innerHTML = `
+                        <div class="bg-white p-4 rounded-lg shadow-sm max-w-[80%] border border-red-200">
+                            <div class="flex items-start space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=AI&background=10b981&color=fff" 
+                                     alt="AI" class="w-8 h-8 rounded-full flex-shrink-0">
+                                <div>
+                                    <h3 class="font-medium text-gray-800">AI Assistant</h3>
+                                    <p class="text-red-600 mt-1">Sorry, I encountered an error. Please try again.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.querySelector('.space-y-4').appendChild(errorMsg);
+                    
+                    // Scroll to bottom
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+            });
+            
+            // Simulate API call (replace with actual API call in production)
+            function simulateApiCall(prompt) {
+                return new Promise((resolve) => {
+                    // Simulate network delay
+                    setTimeout(() => {
+                        // Simple response logic based on prompt
+                        const responses = [
+                            `I understand you're asking about "${prompt}". While I don't have real capabilities in this demo, in a real application I would provide a thoughtful response to your query.`,
+                            `Thanks for your message: "${prompt}". This is a simulated response, but in a real app I'd analyze your question carefully.`,
+                            `Interesting question about "${prompt}"! A real AI would generate a detailed answer here.`,
+                            `I've received your message about "${prompt}". This demo shows the UI, but connecting to an actual AI service would provide real answers.`,
+                            `"${prompt}" is an important topic. In a production app, I'd give you a comprehensive response.`
+                        ];
+                        
+                        // Random response for demo purposes
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        resolve(randomResponse);
+                    }, 1500 + Math.random() * 2000); // Random delay between 1.5-3.5 seconds
+                });
+            }
+            
+            // Initial render
+            renderHistory();
+        });
+    </script>
+</body>
+</html>
