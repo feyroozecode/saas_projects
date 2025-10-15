@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic Q&A & Quiz Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Q&A Section Styles */
+        .qa-input-group {
+            margin-bottom: 20px;
+        }
+
+        .qa-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .qa-input-group input,
+        .qa-input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .qa-input-group input:focus,
+        .qa-input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .qa-input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        .suggestions {
+            margin-top: 30px;
+        }
+
+        .suggestions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .suggestion-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .suggestion-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .qa-history {
+            margin-top: 30px;
+        }
+
+        .qa-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .qa-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .qa-item p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Quiz Section Styles */
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .result-card h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .result-score {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .category-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕌 Islamic Learning Platform</h1>
+            <p>Ask Questions & Test Your Knowledge</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('qa')">Q&A</button>
+            <button class="tab-btn" onclick="switchTab('quiz')">Quiz</button>
+        </div>
+
+        <!-- Q&A Section -->
+        <div id="qa" class="content-section active">
+            <h2 style="color: #667eea; margin-bottom: 20px;">Ask Your Question</h2>
+            
+            <div class="qa-input-group">
+                <label for="question">Your Question:</label>
+                <textarea id="question" placeholder="Type your Islamic question here..."></textarea>
+            </div>
+
+            <button class="btn" onclick="searchQuestion()">Search Similar Questions</button>
+
+            <div id="suggestions" class="suggestions hidden">
+                <h3>Similar Questions from IslamQA:</h3>
+                <div id="suggestionsContainer"></div>
+            </div>
+
+            <div id="qaHistory" class="qa-history hidden">
+                <h3>Your Questions:</h3>
+                <div id="qaHistoryContainer"></div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz" class="content-section">
+            <div class="quiz-container">
+                <div id="quizStart">
+                    <h2 style="color: #667eea; margin-bottom: 20px; text-align: center;">Choose a Category</h2>
+                    <div class="category-selector">
+                        <button class="category-btn" onclick="startQuiz('basics')">Islamic Basics</button>
+                        <button class="category-btn" onclick="startQuiz('prophets')">Prophets</button>
+                        <button class="category-btn" onclick="startQuiz('quran')">Quran Knowledge</button>
+                        <button class="category-btn" onclick="startQuiz('history')">Islamic History</button>
+                        <button class="category-btn" onclick="startQuiz('worship')">Worship & Practice</button>
+                        <button class="category-btn" onclick="startQuiz('mixed')">Mixed Questions</button>
+                    </div>
+                </div>
+
+                <div id="quizGame" class="hidden">
+                    <div class="quiz-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="currentQ">1</div>
+                            <div class="stat-label">Question</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="score">0</div>
+                            <div class="stat-label">Score</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="totalQ">10</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+
+                    <div id="questionContainer"></div>
+
+                    <div class="quiz-controls">
+                        <button class="btn" onclick="prevQuestion()" id="prevBtn">Previous</button>
+                        <button class="btn" onclick="nextQuestion()" id="nextBtn">Next</button>
+                    </div>
+                </div>
+
+                <div id="quizResult" class="hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let currentTab = 'qa';
+        let qaHistory = [];
+        let quizData = {
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            answers: [],
+            category: ''
+        };
+
+        // Quiz Questions Database
+        const quizQuestions = {
+            basics: [
+                {
+                    question: "What are the five pillars of Islam?",
+                    options: [
+                        "Shahada, Salah, Zakat, Sawm, Hajj",
+                        "Prayer, Fasting, Charity, Pilgrimage, Jihad",
+                        "Faith, Hope, Charity, Prayer, Worship",
+                        "Belief, Prayer, Charity, Fasting, Sacrifice"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "How many times a day do Muslims pray?",
+                    options: ["Three times", "Five times", "Seven times", "Once"],
+                    correct: 1
+                },
+                {
+                    question: "What is the Islamic declaration of faith called?",
+                    options: ["Hajj", "Shahada", "Zakat", "Sawm"],
+                    correct: 1
+                },
+                {
+                    question: "Which month is the fasting month for Muslims?",
+                    options: ["Muharram", "Rajab", "Ramadan", "Shawwal"],
+                    correct: 2
+                },
+                {
+                    question: "What percentage of wealth is typically given as Zakat?",
+                    options: ["1.5%", "2.5%", "5%", "10%"],
+                    correct: 1
+                }
+            ],
+            prophets: [
+                {
+                    question: "Who was the first prophet in Islam?",
+                    options: ["Prophet Muhammad", "Prophet Ibrahim", "Prophet Adam", "Prophet Nuh"],
+                    correct: 2
+                },
+                {
+                    question: "Who was the father of Prophet Ibrahim?",
+                    options: ["Azar", "Lut", "Ismail", "Ishaq"],
+                    correct: 0
+                },
+                {
+                    question: "Which prophet built the Kaaba?",
+                    options: ["Prophet Muhammad", "Prophet Adam", "Prophet Ibrahim and Ismail", "Prophet Nuh"],
+                    correct: 2
+                },
+                {
+                    question: "Which prophet could speak to animals?",
+                    options: ["Prophet Musa", "Prophet Isa", "Prophet Sulaiman", "Prophet Yusuf"],
+                    correct: 2
+                },
+                {
+                    question: "Who was the last prophet sent by Allah?",
+                    options: ["Prophet Isa", "Prophet Musa", "Prophet Ibrahim", "Prophet Muhammad"],
+                    correct: 3
+                }
+            ],
+            quran: [
+                {
+                    question: "How many chapters (Surahs) are in the Quran?",
+                    options: ["100", "114", "120", "99"],
+                    correct: 1
+                },
+                {
+                    question: "What is the longest Surah in the Quran?",
+                    options: ["Al-Baqarah", "Al-Imran", "An-Nisa", "Al-Fatihah"],
+                    correct: 0
+                },
+                {
+                    question: "Which Surah is known as the heart of the Quran?",
+                    options: ["Al-Fatihah", "Ya-Sin", "Al-Mulk", "Al-Kahf"],
+                    correct: 1
+                },
+                {
+                    question: "In which language was the Quran revealed?",
+                    options: ["Hebrew", "Aramaic", "Arabic", "Persian"],
+                    correct: 2
+                },
+                {
+                    question: "Which angel revealed the Quran to Prophet Muhammad?",
+                    options: ["Mikail", "Israfil", "Jibreel", "Azrael"],
+                    correct: 2
+                }
+            ],
+            history: [
+                {
+                    question: "In which year did the Hijrah (migration to Madinah) occur?",
+                    options: ["610 CE", "622 CE", "630 CE", "632 CE"],
+                    correct: 1
+                },
+                {
+                    question: "Who was the first Caliph after Prophet Muhammad?",
+                    options: ["Umar ibn al-Khattab", "Uthman ibn Affan", "Ali ibn Abi Talib", "Abu Bakr as-Siddiq"],
+                    correct: 3
+                },
+                {
+                    question: "In which cave did Prophet Muhammad receive the first revelation?",
+                    options: ["Cave Thawr", "Cave Hira", "Cave Uhud", "Cave Quba"],
+                    correct: 1
+                },
+                {
+                    question: "What was the name of Prophet Muhammad's grandfather?",
+                    options: ["Abu Talib", "Abdullah", "Abdul Muttalib", "Abu Lahab"],
+                    correct: 2
+                },
+                {
+                    question: "Which battle is known as the first major battle in Islam?",
+                    options: ["Battle of Uhud", "Battle of Badr", "Battle of Khandaq", "Battle of Hunayn"],
+                    correct: 1
+                }
+            ],
+            worship: [
+                {
+                    question: "What is the direction Muslims face during prayer?",
+                    options: ["North", "Towards Mecca (Qibla)", "East", "West"],
+                    correct: 1
+                },
+                {
+                    question: "How many units (Rakah) are in Fajr prayer?",
+                    options: ["2", "3", "4", "5"],
+                    correct: 0
+                },
+                {
+                    question: "What is the special night prayer during Ramadan called?",
+                    options: ["Tahajjud", "Taraweeh", "Witr", "Duha"],
+                    correct: 1
+                },
+                {
+                    question: "On which day of the week is Jummah prayer performed?",
+                    options: ["Thursday", "Friday", "Saturday", "Sunday"],
+                    correct: 1
+                },
+                {
+                    question: "What is the call to prayer called?",
+                    options: ["Iqamah", "Adhan", "Takbir", "Taslim"],
+                    correct: 1
+                }
+            ]
+        };
+
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+            currentTab = tab;
+        }
+
+        // Q&A Functions
+        function searchQuestion() {
+            const question = document.getElementById('question').value.trim();
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Simulate IslamQA search with mock data
+            const suggestions = generateMockSuggestions(question);
+            displaySuggestions(suggestions);
+
+            // Add to history
+            addToHistory(question);
+        }
+
+        function generateMockSuggestions(question) {
+            const keywords = question.toLowerCase();
+            const suggestions = [];
+
+            if (keywords.includes('prayer') || keywords.includes('salah')) {
+                suggestions.push({
+                    title: "The Importance of Prayer in Islam",
+                    description: "Prayer (Salah) is the second pillar of Islam and a direct link between the worshipper and Allah."
+                });
+                suggestions.push({
+                    title: "How to Perform Prayer Correctly",
+                    description: "Step-by-step guide to performing the five daily prayers according to Sunnah."
+                });
+            } else if (keywords.includes('fasting') || keywords.includes('ramadan')) {
+                suggestions.push({
+                    title: "The Virtues of Fasting in Ramadan",
+                    description: "Fasting during Ramadan is obligatory and carries immense spiritual rewards."
+                });
+                suggestions.push({
+                    title: "Rules of Fasting in Islam",
+                    description: "Comprehensive guide on what breaks the fast and exceptions to fasting."
+                });
+            } else if (keywords.includes('zakat') || keywords.includes('charity')) {
+                suggestions.push({
+                    title: "Understanding Zakat: The Third Pillar",
+                    description: "Zakat purifies wealth and helps support the community's needy members."
+                });
+                suggestions.push({
+                    title: "How to Calculate Zakat",
+                    description: "Guidelines for calculating 2.5% of savings held for one lunar year."
+                });
+            } else {
+                suggestions.push({
+                    title: "General Islamic Knowledge",
+                    description: "Your question touches on important Islamic topics. Search IslamQA.info for detailed scholarly answers."
+                });
+                suggestions.push({
+                    title: "Ask a Scholar",
+                    description: "For specific religious rulings, consult qualified Islamic scholars in your area."
+                });
+            }
+
+            return suggestions;
+        }
+
+        function displaySuggestions(suggestions) {
+            const container = document.getElementById('suggestionsContainer');
+            const section = document.getElementById('suggestions');
+            
+            container.innerHTML = suggestions.map(s => `
+                <div class="suggestion-card">
+                    <h4>${s.title}</h4>
+                    <p>${s.description}</p>
+                </div>
+            `).join('');
+            
+            section.classList.remove('hidden');
+        }
+
+        function addToHistory(question) {
+            qaHistory.unshift({
+                question: question,
+                timestamp: new Date().toLocaleString()
+            });
+
+            const container = document.getElementById('qaHistoryContainer');
+            const section = document.getElementById('qaHistory');
+            
+            container.innerHTML = qaHistory.slice(0, 5).map(item => `
+                <div class="qa-item">
+                    <h4>Q: ${item.question}</h4>
+                    <p style="font-size: 12px; color: #999; margin-top: 5px;">${item.timestamp}</p>
+                </div>
+            `).join('');
+            
+            section.classList.remove('hidden');
+        }
+
+        // Quiz Functions
+        function startQuiz(category) {
+            quizData.category = category;
+            
+            // Get questions for category or mixed
+            if (category === 'mixed') {
+                const allQuestions = Object.values(quizQuestions).flat();
+                quizData.questions = shuffleArray(allQuestions).slice(0, 10);
+            } else {
+                quizData.questions = shuffleArray([...quizQuestions[category]]).slice(0, 10);
+            }
+            
+            quizData.currentIndex = 0;
+            quizData.score = 0;
+            quizData.answers = new Array(quizData.questions.length).fill(null);
+
+            document.getElementById('quizStart').classList.add('hidden');
+            document.getElementById('quizGame').classList.remove('hidden');
+            document.getElementById('totalQ').textContent = quizData.questions.length;
+
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function displayQuestion() {
+            const q = quizData.questions[quizData.currentIndex];
+            const container = document.getElementById('questionContainer');
+            
+            document.getElementById('currentQ').textContent = quizData.currentIndex + 1;
+            
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">Question ${quizData.currentIndex + 1} of ${quizData.questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option ${quizData.answers[quizData.currentIndex] === i ? 'selected' : ''}" 
+                                 onclick="selectAnswer(${i})">
+                                ${String.fromCharCode(65 + i)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            updateButtons();
+        }
+
+        function selectAnswer(optionIndex) {
+            quizData.answers[quizData.currentIndex] = optionIndex;
+            displayQuestion();
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = quizData.currentIndex === 0;
+            document.getElementById('nextBtn').textContent = 
+                quizData.currentIndex === quizData.questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function prevQuestion() {
+            if (quizData.currentIndex > 0) {
+                quizData.currentIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (quizData.currentIndex < quizData.questions.length - 1) {
+                quizData.currentIndex++;
+                displayQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            // Calculate score
+            quizData.score = 0;
+            quizData.questions.forEach((q, i) => {
+                if (quizData.answers[i] === q.correct) {
+                    quizData.score++;
+                }
+            });
+
+            const percentage = Math.round((quizData.score / quizData.questions.length) * 100);
+            let message = '';
+            
+            if (percentage >= 90) {
+                message = '🌟 Excellent! Masha Allah!';
+            } else if (percentage >= 70) {
+                message = '👍 Great job! Keep learning!';
+            } else if (percentage >= 50) {
+                message = '📚 Good effort! Study more!';
+            } else {
+                message = '💪 Keep practicing! You can do better!';
+            }
+
+            document.getElementById('quizGame').classList.add('hidden');
+            document.getElementById('quizResult').classList.remove('hidden');
+            document.getElementById('quizResult').innerHTML = `
+                <div class="result-card">
+                    <h2>Quiz Complete!</h2>
+                    <div class="result-score">${percentage}%</div>
+                    <div class="result-message">${message}</div>
+                    <p style="font-size: 1.2em; margin-bottom: 20px;">
+                        You scored ${quizData.score} out of ${quizData.questions.length}
+                    </p>
+                    <button class="btn" onclick="reviewAnswers()">Review Answers</button>
+                    <button class="btn" onclick="restartQuiz()" style="margin-left: 10px;">Take Another Quiz</button>
+                </div>
+            `;
+        }
+
+        function reviewAnswers() {
+            const container = document.getElementById('quizResult');
+            let html = '<h2 style="color: #667eea; margin-bottom: 20px;">Review Your Answers</h2>';
+            
+            quizData.questions.forEach((q, i) => {
+                const userAnswer = quizData.answers[i];
+                const isCorrect = userAnswer === q.correct;
+                
+                html += `
+                    <div class="question-card" style="margin-bottom: 20px;">
+                        <div class="question-number">Question ${i + 1}</div>
+                        <div class="question-text">${q.question}</div>
+                        <div class="options">
+                            ${q.options.map((opt, j) => {
+                                let className = 'option';
+                                if (j === q.correct) className += ' correct';
+                                else if (j === userAnswer && !isCorrect) className += ' incorrect';
+                                return `<div class="${className}">${String.fromCharCode(65 + j)}. ${opt}</div>`;
+                            }).join('')}
+                        </div>
+                        <p style="margin-top: 10px; color: ${isCorrect ? '#4caf50' : '#f44336'}; font-weight: bold;">
+                            ${isCorrect ? '✓ Correct!' : `✗ Your answer was incorrect. Correct answer: ${String.fromCharCode(65 + q.correct)}`}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            html += '<button class="btn" onclick="restartQuiz()">Take Another Quiz</button>';
+            container.innerHTML = html;
+        }
+
+        function restartQuiz() {
+            document.getElementById('quizResult').classList.add('hidden');
+            document.getElementById('quizStart').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
